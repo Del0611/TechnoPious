@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>TechnoPious Premium v7</title>
+<title>TechnoPious Premium v8</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -161,7 +161,11 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
 .reply-preview-text{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .reply-preview-close{background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:0 4px;}
 
-.typing-bar{padding:2px 16px;min-height:18px;font-size:10px;font-family:var(--mono);color:var(--text2);}
+.typing-bar{padding:2px 16px;min-height:18px;font-size:10px;font-family:var(--mono);color:var(--text2);display:flex;align-items:center;gap:5px;}
+.tdots span{display:inline-block;width:3px;height:3px;background:var(--accent);border-radius:50%;animation:td 1.2s infinite;}
+.tdots span:nth-child(2){animation-delay:.2s;}
+.tdots span:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,60%,100%{transform:scale(1);opacity:.5;}30%{transform:scale(1.6);opacity:1;}}
 
 /* INPUT BAR */
 .input-bar{
@@ -192,15 +196,32 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
 .lightbox.show{display:flex;}
 .lightbox img{max-width:90vw;max-height:80vh;border-radius:8px;}
 
+/* ── STATUS BAR ── */
+.status-bar{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:4px 14px;font-family:var(--mono);font-size:10px;
+  background:rgba(251,191,36,.08);border-bottom:1px solid rgba(251,191,36,.2);
+  color:var(--yellow);flex-shrink:0;
+}
+.status-bar.ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2);color:var(--green);}
+.status-bar.hide{display:none;}
+#connDot{width:6px;height:6px;border-radius:50%;background:var(--yellow);}
+
 @media(max-width:640px){
   .menu-btn{display:flex;}
   .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:160;transform:translateX(-100%);width:80vw;}
   .sidebar.open{transform:none;}
-  .action-group{opacity:1;} /* Selalu telihat di HP agar mudah ditap */
+  .action-group{opacity:1;}
 }
 </style>
 </head>
 <body>
+
+<!-- STATUS BAR -->
+<div class="status-bar" id="statusBar">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <span id="statusText">Menghubungkan ke server...</span>
+</div>
 
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:8px;">
@@ -208,7 +229,8 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
     <div class="logo"><div class="logo-dot"></div>TechnoPious</div>
   </div>
   <div class="badge-id"><div class="dot"></div><span id="myIdLabel">--</span></div>
-  <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;">
+  <div style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);">
+    <div id="connDot"></div>
     <span id="onlineCount">1 online</span>
   </div>
 </header>
@@ -222,6 +244,7 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
       <div class="sb-label">Publik Space</div>
       <button class="ch-btn active" id="btn-global"><div class="ch-icon">🌐</div><span>Global</span></button>
       <button class="ch-btn" id="btn-random"><div class="ch-icon">🎲</div><span>Matrix Room</span></button>
+      <button class="ch-btn" id="btn-tech"><div class="ch-icon">⚙️</div><span>Cyber Talk</span></button>
     </div>
     <div class="divider"></div>
     <div class="sb-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
@@ -241,6 +264,7 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
       <div class="online-pill"><div class="dot"></div><span id="roomCount">1</span> online</div>
     </div>
 
+    <!-- PINNED CHAT HEADER PANEL -->
     <div class="pinned-bar" id="pinnedBar">
       <div class="pinned-content">
         <span>📌 Tersemat:</span>
@@ -252,6 +276,7 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
     <div class="messages" id="messages"></div>
     <div class="typing-bar" id="typingBar"></div>
 
+    <!-- REPLY PREVIEW BAR -->
     <div class="reply-preview-bar" id="replyPreviewBar">
       <div class="reply-preview-content">
         <div class="reply-preview-user" id="replyPreviewUser">Membalas @User</div>
@@ -260,6 +285,7 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
       <button class="reply-preview-close" id="replyPreviewClose">✕</button>
     </div>
 
+    <!-- IMG PREVIEW -->
     <div class="img-preview" id="imgPreview">
       <img class="prev-thumb" id="prevThumb" src="" alt="">
       <div style="flex:1;font-size:11px;font-family:var(--mono);color:var(--text2)">Gambar disematkan</div>
@@ -268,7 +294,7 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
 
     <div class="input-bar">
       <button class="ico-btn" id="imgBtn">📷</button>
-      <textarea class="msg-inp" id="msgInp" rows="1" placeholder="Ketik pesan..."></textarea>
+      <textarea class="msg-inp" id="msgInp" rows="1" placeholder="Ketik pesan..." autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
       <button class="send-btn" id="sendBtn">➔</button>
     </div>
   </main>
@@ -277,8 +303,23 @@ body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:colum
 <div class="lightbox" id="lightbox"><img src="" id="lbImg"><button id="lbClose" style="position:absolute;top:20px;right:20px;color:#fff;background:transparent;border:none;font-size:24px;cursor:pointer;">✕</button></div>
 <input type="file" id="fileInp" accept="image/*" style="display:none">
 
-<script>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, set, remove, serverTimestamp, onDisconnect, off }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
 // ── CONFIG & GENERATOR ──
+const firebaseConfig = {
+  apiKey: "AIzaSyDemo-TechnoPious-PublicKey",
+  authDomain: "technopious-demo.firebaseapp.com",
+  databaseURL: "https://technopious-chat-default-rtdb.firebaseio.com",
+  projectId: "technopious-chat",
+  storageBucket: "technopious-chat.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
+};
+
 const COLORS = [
   {bg:'#2d1b69',text:'#c4b5fd'},{bg:'#064e3b',text:'#6ee7b7'},
   {bg:'#7f1d1d',text:'#fca5a5'},{bg:'#1e3a5f',text:'#93c5fd'},
@@ -290,6 +331,18 @@ function genId(){
   return w[Math.floor(Math.random()*w.length)]+(Math.floor(1000+Math.random()*9000));
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ts2time(ts){return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});}
+function compressImage(dataUrl,maxW=800,q=0.7){
+  return new Promise(res=>{
+    const img=new Image();img.onload=()=>{
+      const ratio=Math.min(1,maxW/img.width);
+      const c=document.createElement('canvas');
+      c.width=img.width*ratio;c.height=img.height*ratio;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL('image/jpeg',q));
+    };img.src=dataUrl;
+  });
+}
 
 // ── STATE MANAGEMENT ──
 const myId = (() => {
@@ -301,23 +354,27 @@ const myId = (() => {
 let currentRoom = 'global';
 let pendingImage = null;
 let selectedReplyMsg = null;
+const unread = {};
+const typingSet = new Set();
+let typingTimer;
 
-// Mengatur Pin Data per Room
 const pinnedRoomStorage = {};
-
-const localMsgs = { 
-  global:[{id:'s0',type:'system',text:'Terhubung ke Cyber Space via GitHub Pages 🚀'}], 
-  random:[{id:'s1',type:'system',text:'Matrix Room - Buka tab baru untuk tes multi-tab!'}] 
-};
+const localMsgs = { global:[], random:[], tech:[] };
 const localDMs = {};
+function getDmKey(a,b){return [a,b].sort().join('|');}
+function getDmMsgs(k){if(!localDMs[k])localDMs[k]=[];return localDMs[k];}
+
 const peers = new Map();
-peers.set(myId, {color: getColor(myId)});
+peers.set(myId, {color: getColor(myId), lastSeen:Date.now()});
 
 let bc;
-try { bc = new BroadcastChannel('technopious_v7'); } catch(e) { bc = {postMessage:()=>{},onmessage:null}; }
+try { bc = new BroadcastChannel('technopious_v8'); } catch(e) { bc = {postMessage:()=>{},onmessage:null}; }
 
 // ── DOM REFS ──
 const $id = id => document.getElementById(id);
+const statusBar = $id('statusBar');
+const statusText = $id('statusText');
+const connDot = $id('connDot');
 const myIdLabel = $id('myIdLabel');
 const onlineCount = $id('onlineCount');
 const roomCount = $id('roomCount');
@@ -350,7 +407,9 @@ const pinnedBar = $id('pinnedBar');
 const pinnedText = $id('pinnedText');
 const unpinBtn = $id('unpinBtn');
 
+// UI Init
 myIdLabel.textContent = myId;
+setStatus('connecting', 'Menghubungkan ke server...');
 
 const botResponses = [
   "Halo! Sinyal GitHub kamu kencang juga ya.",
@@ -360,7 +419,135 @@ const botResponses = [
   "Mantaap! Senang bisa bertukar enkripsi data."
 ];
 
-// ── BROADCAST CHANNEL JARINGAN ──
+// ── FIREBASE ATTEMPT ──
+let db = null;
+let firebaseOk = false;
+let fbListeners = {};
+
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+
+  const connRef = ref(db, '.info/connected');
+  onValue(connRef, (snap) => {
+    if (snap.val() === true) {
+      firebaseOk = true;
+      setStatus('hide', '');
+      setupFirebase();
+    } else {
+      if (firebaseOk) setStatus('connecting', 'Koneksi terputus, mencoba ulang...');
+    }
+  });
+
+  setTimeout(() => {
+    if (!firebaseOk) {
+      setStatus('ok', '✓ Mode lokal (chat antar tab browser)');
+      setupLocalMode();
+    }
+  }, 4000);
+
+} catch(e) {
+  setStatus('ok', '✓ Mode lokal (chat antar tab browser)');
+  setupLocalMode();
+}
+
+// ── FIREBASE ENGINE ──
+function setupFirebase() {
+  const presRef = ref(db, `presence/${myId}`);
+  set(presRef, { id: myId, ts: serverTimestamp() });
+  onDisconnect(presRef).remove();
+
+  onValue(ref(db, 'presence'), snap => {
+    const data = snap.val() || {};
+    peers.clear();
+    peers.set(myId, {color: getColor(myId)});
+    Object.keys(data).forEach(id => {
+      if (id !== myId) peers.set(id, {color: getColor(id)});
+    });
+    updatePeerUI();
+  });
+
+  watchRoom(currentRoom);
+
+  onValue(ref(db, `typing/${currentRoom}`), snap => {
+    const data = snap.val() || {};
+    typingSet.clear();
+    Object.keys(data).forEach(id => { if (id !== myId) typingSet.add(id); });
+    renderTyping();
+  });
+
+  // Watch Pin Global Sync via FB
+  onValue(ref(db, `pins`), snap => {
+    const data = snap.val() || {};
+    Object.keys(data).forEach(room => {
+      pinnedRoomStorage[room] = data[room];
+    });
+    renderPinnedBar();
+  });
+
+  watchDMs();
+}
+
+function watchRoom(room) {
+  if (fbListeners.room) { off(fbListeners.room.ref); }
+
+  const r = ref(db, `rooms/${room}/messages`);
+  fbListeners.room = { ref: r };
+  localMsgs[room] = [];
+
+  onValue(r, snap => {
+    localMsgs[room] = [];
+    if (snap.exists()) {
+      snap.forEach(child => {
+        localMsgs[room].push(child.val());
+      });
+    }
+    if (currentRoom === room) renderMessages();
+  });
+}
+
+function watchDMs() {
+  const r = ref(db, `dms/${myId}`);
+  onValue(r, snap => {
+    if (!snap.exists()) return;
+    snap.forEach(peerSnap => {
+      const peer = peerSnap.key;
+      const key = getDmKey(myId, peer);
+      const msgs = [];
+      peerSnap.forEach(msgSnap => { msgs.push(msgSnap.val()); });
+      const prev = getDmMsgs(key).length;
+      localDMs[key] = msgs;
+      if (msgs.length > prev && currentRoom !== 'dm:' + peer) {
+        const last = msgs[msgs.length - 1];
+        if (last.sender !== myId) {
+          unread[key] = (unread[key] || 0) + 1;
+          renderDmList();
+          showToast(peer, last.image ? '📷 Gambar' : last.text);
+        }
+      }
+      if (currentRoom === 'dm:' + peer) renderMessages();
+    });
+  });
+}
+
+// ── LOCAL BROADCAST ENGINE ──
+function setupLocalMode() {
+  bc.postMessage({ type: 'presence', id: myId });
+  peers.set(myId, { color: getColor(myId) });
+
+  if (!localMsgs.global.length) {
+    localMsgs.global.push(
+      {id:'s0',type:'system',text:'Selamat datang di TechnoPious 👾'},
+      {id:'s1',type:'system',text:'Mode lokal aktif — buka tab baru untuk simulasi chat'}
+    );
+  }
+  if (!localMsgs.random.length) localMsgs.random.push({id:'sr',type:'system',text:'Matrix Room - Ruang diskusi bebas.'});
+  if (!localMsgs.tech.length) localMsgs.tech.push({id:'st',type:'system',text:'Cyber Talk - Diskusi kode & tech.'});
+
+  updatePeerUI();
+  renderMessages();
+}
+
 bc.onmessage = (e) => {
   const d = e.data;
   if (d.type === 'presence') {
@@ -377,19 +564,26 @@ bc.onmessage = (e) => {
     localMsgs[d.room].push(d.msg);
     if (currentRoom === d.room) renderMessages();
   }
-  if (d.type === 'dm' && d.to === myId) {
-    const key = [myId, d.from].sort().join('|');
-    if(!localDMs[key]) localDMs[key] = [];
-    localDMs[key].push(d.msg);
+  if (d.type === 'dm') {
+    const key = getDmKey(myId, d.from);
+    getDmMsgs(key).push(d.msg);
     if (currentRoom === 'dm:' + d.from) {
       renderMessages();
     } else {
+      unread[key] = (unread[key] || 0) + 1;
       renderDmList();
+      showToast(d.from, d.msg.image ? '📷 Gambar' : d.msg.text);
     }
   }
   if (d.type === 'pin_sync') {
     pinnedRoomStorage[d.room] = d.pinData;
     if (currentRoom === d.room) renderPinnedBar();
+  }
+  if (d.type === 'typing') {
+    if (d.room === currentRoom && d.id !== myId) {
+      if(d.active) typingSet.add(d.id); else typingSet.delete(d.id);
+      renderTyping();
+    }
   }
   if (d.type === 'gone') {
     peers.delete(d.id);
@@ -397,14 +591,13 @@ bc.onmessage = (e) => {
   }
 };
 
-bc.postMessage({ type: 'presence', id: myId });
-
 function updatePeerUI() {
   onlineCount.textContent = peers.size + ' online';
   roomCount.textContent = peers.size;
   renderDmList();
 }
 
+// ── DISCOVERY & CONNECTION ──
 function triggerDiscovery() {
   const otherPeers = [...peers.keys()].filter(id => id !== myId);
   if (otherPeers.length > 0) {
@@ -415,11 +608,11 @@ function triggerDiscovery() {
     const selectedBot = mockBots[Math.floor(Math.random() * mockBots.length)];
     if(!peers.has(selectedBot)) {
       peers.set(selectedBot, { color: getColor(selectedBot) });
-      const key = [myId, selectedBot].sort().join('|');
+      const key = getDmKey(myId, selectedBot);
       localDMs[key] = [{
         id: 'bot_init',
         sender: selectedBot,
-        text: "Sinyal real-time mendeteksi kamu sendirian. Mode enkripsi bot diaktifkan! Silakan chat saya.",
+        text: "Sinyal mendeteksi kamu sedang sendirian. Enkripsi simulasi Bot diaktifkan!",
         ts: Date.now()
       }];
     }
@@ -429,22 +622,29 @@ function triggerDiscovery() {
 }
 $id('discoveryBtn').addEventListener('click', triggerDiscovery);
 
-// ── FEATURE: PIN & UNPIN LOGIC ──
+// ── PIN ENGINE ──
 function initPin(sender, textContent) {
   const pinData = { sender: sender, text: textContent };
   pinnedRoomStorage[currentRoom] = pinData;
   
-  // Sync pin data ke tab lain via BroadcastChannel
-  bc.postMessage({ type: 'pin_sync', room: currentRoom, pinData: pinData });
-  
+  if (firebaseOk && db) {
+    set(ref(db, `pins/${currentRoom}`), pinData);
+  } else {
+    bc.postMessage({ type: 'pin_sync', room: currentRoom, pinData: pinData });
+  }
   renderPinnedBar();
 }
 
 function removePin() {
   pinnedRoomStorage[currentRoom] = null;
-  bc.postMessage({ type: 'pin_sync', room: currentRoom, pinData: null });
+  if (firebaseOk && db) {
+    remove(ref(db, `pins/${currentRoom}`));
+  } else {
+    bc.postMessage({ type: 'pin_sync', room: currentRoom, pinData: null });
+  }
   renderPinnedBar();
 }
+unpinBtn.addEventListener('click', removePin);
 
 function renderPinnedBar() {
   const activePin = pinnedRoomStorage[currentRoom];
@@ -455,9 +655,8 @@ function renderPinnedBar() {
     pinnedBar.classList.remove('show');
   }
 }
-unpinBtn.addEventListener('click', removePin);
 
-// ── FEATURE: REPLY SYSTEM ──
+// ── REPLY CONTROLLER ──
 function initReply(msgId, sender, textContent) {
   selectedReplyMsg = { id: msgId, sender: sender, text: textContent };
   replyPreviewUser.textContent = `Membalas @${sender}`;
@@ -471,66 +670,111 @@ function cancelReply() {
 }
 replyPreviewClose.addEventListener('click', cancelReply);
 
-window.initReply = initReply;
-window.initPin = initPin;
-
-// ── SEND ENGINE ──
-function sendMessage() {
+// ── SEND AND TYPING SIGNALS ──
+async function sendMessage() {
   const text = msgInp.value.trim();
   if(!text && !pendingImage) return;
 
+  let imgData = null;
+  if (pendingImage) imgData = await compressImage(pendingImage);
+
   const msg = {
-    id: 'm' + Date.now(),
+    id: 'm' + Date.now() + Math.random().toString(36).slice(2),
     sender: myId,
-    text: text,
-    image: pendingImage,
     ts: Date.now(),
+    ...(text && { text }),
+    ...(imgData && { image: imgData }),
     ...(selectedReplyMsg && { replyTo: selectedReplyMsg })
   };
 
   if (currentRoom.startsWith('dm:')) {
     const peer = currentRoom.replace('dm:', '');
-    const key = [myId, peer].sort().join('|');
-    if(!localDMs[key]) localDMs[key] = [];
-    localDMs[key].push(msg);
+    const key = getDmKey(myId, peer);
+    getDmMsgs(key).push(msg);
     
-    if(!peer.endsWith('Bot') && !peer.startsWith('Ghost') && !peer.startsWith('Neon')) {
-      bc.postMessage({ type: 'dm', from: myId, to: peer, msg });
+    if (firebaseOk && db) {
+      push(ref(db, `dms/${myId}/${peer}`), msg);
+      push(ref(db, `dms/${peer}/${myId}`), msg);
     } else {
-      setTimeout(() => {
-        const botMsg = {
-          id: 'bot' + Date.now(),
-          sender: peer,
-          text: botResponses[Math.floor(Math.random() * botResponses.length)],
-          ts: Date.now()
-        };
-        localDMs[key].push(botMsg);
-        if(currentRoom === 'dm:' + peer) renderMessages();
-      }, 1000);
+      if(!peer.endsWith('Bot') && !peer.startsWith('Ghost') && !peer.startsWith('Neon')) {
+        bc.postMessage({ type: 'dm', from: myId, to: peer, msg });
+      } else {
+        // Simulasi Balasan Bot
+        setTimeout(() => {
+          const botMsg = {
+            id: 'bot' + Date.now(),
+            sender: peer,
+            text: botResponses[Math.floor(Math.random() * botResponses.length)],
+            ts: Date.now()
+          };
+          getDmMsgs(key).push(botMsg);
+          if(currentRoom === 'dm:' + peer) renderMessages();
+        }, 1000);
+      }
     }
   } else {
+    if (!localMsgs[currentRoom]) localMsgs[currentRoom] = [];
     localMsgs[currentRoom].push(msg);
-    bc.postMessage({ type: 'msg', room: currentRoom, msg });
+
+    if (firebaseOk && db) {
+      push(ref(db, `rooms/${currentRoom}/messages`), msg);
+    } else {
+      bc.postMessage({ type: 'msg', room: currentRoom, msg });
+    }
   }
 
+  sendTypingSignal(false);
   msgInp.value = '';
+  msgInp.style.height = '40px';
   pendingImage = null;
   imgPreview.classList.remove('show');
+  prevThumb.src = '';
   cancelReply();
   renderMessages();
+  msgInp.focus();
 }
 
-// ── ROOM SWITCHER ──
+let typingSent = false;
+function sendTypingSignal(active) {
+  if (!active && !typingSent) return;
+  typingSent = active;
+  bc.postMessage({ type: 'typing', id: myId, room: currentRoom, active });
+  if (firebaseOk && db) {
+    if(active) {
+      set(ref(db, `typing/${currentRoom}/${myId}`), { id: myId, ts: Date.now() });
+    } else {
+      try { remove(ref(db, `typing/${currentRoom}/${myId}`)); } catch(e) {}
+    }
+  }
+}
+
+let typingInputTimer;
+msgInp.addEventListener('input', () => {
+  msgInp.style.height = '40px';
+  msgInp.style.height = Math.min(msgInp.scrollHeight, 100) + 'px';
+  sendTypingSignal(true);
+  clearTimeout(typingInputTimer);
+  typingInputTimer = setTimeout(() => sendTypingSignal(false), 2500);
+});
+
+// ── ROOM CONTROLLER ──
+const roomMeta = {
+  global: { icon:'🌐', name:'Global Space', sub:'public · open network' },
+  random: { icon:'🎲', name:'Matrix Room', sub:'public · ruang acak' },
+  tech:   { icon:'⚙️', name:'Cyber Talk', sub:'public · coding & tech' },
+};
+
 function switchRoom(room) {
   currentRoom = room;
+  pendingImage = null;
+  imgPreview.classList.remove('show');
+  prevThumb.src = '';
   cancelReply();
-  renderPinnedBar(); // Update pin bar sesuai room yang aktif
-  
-  $id('btn-global').classList.toggle('active', room === 'global');
-  $id('btn-random').classList.toggle('active', room === 'random');
-  
-  document.querySelectorAll('.dm-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.peer === room.replace('dm:', ''));
+  renderPinnedBar();
+
+  ['global','random','tech'].forEach(r => {
+    const b = $id('btn-' + r);
+    if (b) b.classList.toggle('active', r === room);
   });
 
   if (room.startsWith('dm:')) {
@@ -538,34 +782,41 @@ function switchRoom(room) {
     const col = getColor(peer);
     chatIcon.innerHTML = `<div class="dm-av" style="background:${col.bg};color:${col.text};width:30px;height:30px;display:flex;align-items:center;justify-content:center;">${esc(peer.substring(0,2))}</div>`;
     chatName.textContent = peer;
-    chatSub.textContent = 'Secure Peer Session';
+    chatSub.textContent = 'Secure Session';
+    const key = getDmKey(myId, peer);
+    unread[key] = 0;
+    renderDmList();
+    if (firebaseOk && db) watchDMs();
   } else {
-    chatIcon.textContent = room === 'global' ? '🌐' : '🎲';
-    chatName.textContent = room === 'global' ? 'Global Space' : 'Matrix Room';
-    chatSub.textContent = 'public · open network';
+    chatIcon.textContent = roomMeta[room]?.icon || '💬';
+    chatName.textContent = roomMeta[room]?.name || room;
+    chatSub.textContent = roomMeta[room]?.sub || 'public';
+    if (firebaseOk && db) watchRoom(room);
   }
 
+  typingSet.clear();
+  renderTyping();
   renderMessages();
   closeSidebar();
+  msgInp.focus();
 }
 
-// ── RENDERING MESSAGES & DMS ──
+// ── RENDERING MESSAGES & UI ──
 function renderMessages() {
   let msgs = [];
   if (currentRoom.startsWith('dm:')) {
-    msgs = localDMs[[myId, currentRoom.replace('dm:', '')].sort().join('|')] || [];
+    msgs = getDmMsgs(getDmKey(myId, currentRoom.replace('dm:', '')));
   } else {
     msgs = localMsgs[currentRoom] || [];
   }
 
   if (!msgs.length) {
-    messages.innerHTML = '<div class="empty">Belum ada data di room ini</div>';
+    messages.innerHTML = '<div class="empty">Belum ada transmisi data di room ini</div>';
     return;
   }
 
   let html = '';
   let lastSender = null;
-  
   msgs.forEach(msg => {
     if (msg.type === 'system') {
       html += `<div class="sys-msg">${esc(msg.text)}</div>`;
@@ -583,10 +834,9 @@ function renderMessages() {
       quoteHtml = `<div class="reply-quote"><div class="reply-quote-user">@${esc(msg.replyTo.sender)}</div>${esc(msg.replyTo.text)}</div>`;
     }
 
-    let bubbleContent = msg.image ? `${quoteHtml}<img src="${msg.image}" class="chat-img">` : `${quoteHtml}${esc(msg.text)}`;
+    let bubbleContent = msg.image ? `${quoteHtml}<img src="${msg.image}" class="chat-img" loading="lazy">` : `${quoteHtml}${esc(msg.text)}`;
     const textForReply = msg.image ? '📷 Gambar' : msg.text;
     
-    // Group tombol aksi (Reply & Pin)
     const actionGroupHtml = `
       <div class="action-group">
         <button class="action-btn" onclick="initReply('${msg.id}', '${esc(msg.sender)}', '${esc(textForReply)}')">Reply</button>
@@ -594,12 +844,10 @@ function renderMessages() {
       </div>
     `;
 
-    // FIXED: flex-direction row-reverse pada ".mine" membuat elemen terbalik. 
-    // Jadi jika isMe=true (di kanan), action group ditaruh di urutan kode pertama agar tampil di SEBELAH KIRI bubble chat.
     html += `<div class="msg-row ${isMe ? 'mine' : ''}">
       ${isMe ? '' : avHtml}
-      ${isMe ? actionGroupHtml : ''} 
-      <div class="msg-wrap">${nameHtml}<div class="bubble">${bubbleContent}</div></div>
+      ${isMe ? actionGroupHtml : ''}
+      <div class="msg-wrap">${nameHtml}<div class="bubble">${bubbleContent}</div><div class="msg-time">${ts2time(msg.ts)}</div></div>
       ${isMe ? '' : actionGroupHtml}
       ${isMe ? avHtml : ''}
     </div>`;
@@ -614,6 +862,12 @@ function renderMessages() {
   messages.scrollTop = messages.scrollHeight;
 }
 
+function renderTyping() {
+  if (!typingSet.size) { typingBar.innerHTML = ''; return; }
+  const names = [...typingSet].slice(0,2).map(esc).join(', ');
+  typingBar.innerHTML = `<span class="tdots"><span></span><span></span><span></span></span>&nbsp;${names} mengetik...`;
+}
+
 function renderDmList() {
   const otherPeers = [...peers.keys()].filter(id => id !== myId);
   if(!otherPeers.length) {
@@ -623,11 +877,14 @@ function renderDmList() {
   let html = '';
   otherPeers.forEach(id => {
     const col = getColor(id);
+    const key = getDmKey(myId, id);
+    const u = unread[key] || 0;
     const isActive = currentRoom === 'dm:' + id;
     html += `<button class="ch-btn dm-btn ${isActive?'active':''}" data-peer="${esc(id)}">
       <div class="dm-av" style="background:${col.bg};color:${col.text}">${esc(id.substring(0,2))}</div>
       <div class="online-dot"></div>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;">${esc(id)}</span>
+      ${u>0?`<span class="ch-badge">${u}</span>`:''}
     </button>`;
   });
   dmList.innerHTML = html;
@@ -636,35 +893,98 @@ function renderDmList() {
   });
 }
 
-// ── EVENT LISTENERS ──
-sendBtn.onclick = sendMessage;
-msgInp.onkeydown = e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+function showToast(peerId, preview) {
+  const col = getColor(peerId);
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-av" style="background:${col.bg};color:${col.text}">${esc(peerId.substring(0,2))}</div>
+    <div style="min-width:0"><div class="toast-name">Terminal ${esc(peerId)}</div><div class="toast-prev">${esc(preview)}</div></div>`;
+  t.addEventListener('click', () => { switchRoom('dm:' + peerId); t.remove(); });
+  document.body.appendChild(t);
+  setTimeout(() => { if (t.parentNode) t.remove(); }, 5000);
+}
+
+function setStatus(type, msg) {
+  statusBar.className = 'status-bar';
+  if (type === 'ok') { statusBar.classList.add('ok'); connDot.style.background = 'var(--green)'; }
+  else if (type === 'hide') { statusBar.classList.add('hide'); connDot.style.background = 'var(--green)'; return; }
+  else { connDot.style.background = 'var(--yellow)'; }
+  statusText.textContent = msg;
+}
+
+// ── ATTACHMENT MEDIA HANDLING ──
 imgBtn.onclick = () => fileInp.click();
 fileInp.onchange = function() {
-  if(this.files[0]) {
-    const r = new FileReader();
-    r.onload = e => { pendingImage = e.target.result; prevThumb.src = pendingImage; imgPreview.classList.add('show'); };
-    r.readAsDataURL(this.files[0]);
-  }
+  if (this.files[0]) loadImg(this.files[0]);
+  this.value = '';
 };
-prevRm.onclick = () => { pendingImage = null; imgPreview.classList.remove('show'); };
-lbClose.onclick = () => lightbox.classList.remove('show');
+prevRm.onclick = () => {
+  pendingImage = null;
+  imgPreview.classList.remove('show');
+  prevThumb.src = '';
+};
+function loadImg(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    pendingImage = e.target.result;
+    prevThumb.src = pendingImage;
+    imgPreview.classList.add('show');
+  };
+  r.readAsDataURL(file);
+}
 
-$id('btn-global').onclick = () => switchRoom('global');
-$id('btn-random').onclick = () => switchRoom('random');
+const chatArea = document.querySelector('.chat-main');
+chatArea.addEventListener('dragover', e => { e.preventDefault(); chatArea.style.outline = '2px dashed var(--accent)'; });
+chatArea.addEventListener('dragleave', () => { chatArea.style.outline = ''; });
+chatArea.addEventListener('drop', e => {
+  e.preventDefault(); chatArea.style.outline = '';
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) loadImg(f);
+});
+document.addEventListener('paste', e => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) { loadImg(item.getAsFile()); break; }
+  }
+});
+
+// ── UTILS & GLOBAL SPEC ──
+lbClose.onclick = () => lightbox.classList.remove('show');
+lightbox.onclick = e => { if (e.target === lightbox) lightbox.classList.remove('show'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('show'); });
+
+sendBtn.onclick = sendMessage;
+msgInp.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+['global','random','tech'].forEach(r => {
+  $id('btn-' + r).addEventListener('click', () => switchRoom(r));
+});
 
 function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
 function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
 menuBtn.onclick = openSidebar;
 overlay.onclick = closeSidebar;
 
-window.addEventListener('beforeunload', () => { bc.postMessage({ type: 'gone', id: myId }); });
+window.initReply = initReply;
+window.initPin = initPin;
 
-setInterval(() => { bc.postMessage({ type: 'presence', id: myId }); }, 15000);
+window.addEventListener('beforeunload', () => {
+  bc.postMessage({ type: 'gone', id: myId });
+  if (db && firebaseOk) { try { remove(ref(db, `presence/${myId}`)); } catch(e) {} }
+});
 
-// Initial Fire
 renderMessages();
 renderDmList();
+
+setInterval(() => {
+  bc.postMessage({ type: 'presence', id: myId });
+  if (firebaseOk && db) {
+    try { set(ref(db, `presence/${myId}`), { id: myId, ts: Date.now() }); } catch(e) {}
+  }
+}, 25000);
 </script>
 </body>
 </html>
