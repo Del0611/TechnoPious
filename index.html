@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TechnoPious Premium v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#07070a;--bg2:#0f0f15;--surface:rgba(22,22,34,0.6);--surface2:#1b1b29;
+  --border:rgba(139,92,246,0.15);--border2:rgba(139,92,246,0.35);
+  --accent:#8b5cf6;--accent2:#a78bfa;--accent3:#c4b5fd;
+  --green:#10b981;--red:#f43f5e;--yellow:#f59e0b;
+  --text:#f3f4f6;--text2:#9ca3af;--text3:#4b5563;
+  --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+  --r:16px;--rs:10px;
+  --sidebar-w:280px;
+  --topbar-h:60px;
+}
+html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);background-image:radial-gradient(circle at 50% 0%, rgba(139,92,246,0.08) 0%, transparent 50%);}
+body{font-family:var(--sans);color:var(--text);display:flex;flex-direction:column;backdrop-filter:blur(10px);}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+
+/* ── TOPBAR ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;height:var(--topbar-h);
+  background:rgba(15,15,21,0.75);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);flex-shrink:0;z-index:200;gap:10px;
+}
+.logo{font-weight:800;font-size:22px;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px;white-space:nowrap;background:linear-gradient(to right, #fff, var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+.badge-id{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(22,22,34,0.8);border:1px solid var(--border2);
+  border-radius:30px;padding:6px 14px;
+  font-family:var(--mono);font-size:12px;color:var(--accent3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;
+}
+.badge-id .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0;}
+.menu-btn{
+  width:40px;height:40px;border-radius:var(--rs);border:1px solid var(--border);
+  background:var(--surface);color:var(--text2);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;display:none;transition:all 0.2s;
+}
+.menu-btn:hover{background:var(--surface2);border-color:var(--border2);color:#fff;}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;overflow:hidden;position:relative;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;
+  transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-head{
+  padding:18px 18px 12px;border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  text-transform:uppercase;letter-spacing:1.5px;font-weight:700;
+}
+.sb-section{padding:8px;}
+.sb-label{padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;}
+.ch-btn{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:10px 12px;border:none;background:transparent;
+  color:var(--text2);font-family:var(--sans);font-size:14px;font-weight:700;
+  border-radius:var(--rs);cursor:pointer;transition:all .2s ease;text-align:left;position:relative;
+}
+.ch-btn:hover{background:rgba(255,255,255,0.03);color:var(--text);}
+.ch-btn.active{background:rgba(139,92,246,0.12);color:var(--accent3);border-left:3px solid var(--accent);}
+.ch-icon{width:28px;height:28px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1px solid var(--border);}
+.ch-badge{margin-left:auto;background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;font-weight:700;}
+.dm-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono);font-weight:700;flex-shrink:0;border:1px solid rgba(255,255,255,0.1);}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);position:absolute;bottom:8px;left:32px;border:2px solid var(--bg2);box-shadow:0 0 6px var(--green);}
+.divider{height:1px;background:var(--border);margin:6px 10px;}
+.dm-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+
+/* DISCOVERY BUTTON */
+.discovery-btn{
+  margin:4px 8px 8px;padding:10px;background:linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+  border:none;border-radius:var(--rs);color:#fff;font-family:var(--sans);
+  font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(139,92,246,0.3);
+  transition:all 0.2s ease;
+}
+.discovery-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(139,92,246,0.5);filter:brightness(1.1);}
+.discovery-btn:active{transform:translateY(1px);}
+
+/* ── CHAT MAIN ── */
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:rgba(7,7,10,0.4);}
+.chat-head{
+  display:flex;align-items:center;gap:12px;padding:0 20px;
+  height:56px;background:rgba(15,15,21,0.6);border-bottom:1px solid var(--border);flex-shrink:0;backdrop-filter:blur(10px);
+}
+.chat-head-icon{width:32px;height:32px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid var(--border);}
+.chat-head-name{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-head-sub{font-size:11px;color:var(--text2);font-family:var(--mono);white-space:nowrap;opacity:0.7;}
+.online-pill{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--green);background:rgba(16,114,81,0.15);border:1px solid rgba(16,185,129,0.25);border-radius:20px;padding:4px 12px;white-space:nowrap;flex-shrink:0;}
+.online-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+
+/* ── MESSAGES ── */
+.messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:4px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.msg-row{display:flex;align-items:flex-end;gap:10px;animation:fadeUp .25s cubic-bezier(0.4, 0, 0.2, 1);margin-bottom:2px;}
+.msg-row.mine {flex-direction:row-reverse;}
+.msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono);font-weight:700;flex-shrink:0;align-self:flex-end;border:1px solid rgba(255,255,255,0.08);}
+.msg-av.hide{visibility:hidden;}
+.msg-wrap{display:flex;flex-direction:column;gap:3px;max-width:72%;}
+.msg-row.mine .msg-wrap{align-items:flex-end;}
+.msg-name{font-size:10px;font-family:var(--mono);color:var(--accent2);padding:0 6px;margin-bottom:1px;font-weight:700;}
+.bubble{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px 16px 16px 4px;
+  padding:10px 15px;font-size:14px;line-height:1.6;
+  color:var(--text);word-break:break-word;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+.msg-row.mine .bubble{
+  background:linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(109,40,217,0.15) 100%);
+  border-color:var(--border2);
+  border-radius:16px 16px 4px 16px;color:var(--text);
+  box-shadow:0 4px 12px rgba(139,92,246,0.1);
+}
+.bubble img{max-width:100%;max-height:240px;border-radius:10px;display:block;cursor:pointer;object-fit:contain;margin-top:4px;}
+
+/* ── REPLY QUOTE IN BUBBLE ── */
+.reply-quote{
+  background:rgba(0,0,0,0.3);border-left:3px solid var(--accent);
+  padding:6px 10px;border-radius:6px;font-size:12px;margin-bottom:8px;
+  color:var(--text2);font-family:var(--sans);max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.reply-quote-user{font-family:var(--mono);font-weight:700;font-size:10px;color:var(--accent2);margin-bottom:2px;}
+
+/* ── REPLY ACTION BUTTON ── */
+.reply-action-btn{
+  opacity: 0;transition: opacity 0.2s, background 0.2s;
+  background: var(--surface2);border: 1px solid var(--border);
+  color: var(--text2);font-family: var(--mono);font-size: 11px;
+  padding: 4px 10px;border-radius: 20px;cursor: pointer;
+  align-self: center;margin: 0 6px;font-weight: 700;
+}
+.msg-row:hover .reply-action-btn{opacity: 1;}
+.reply-action-btn:hover{color: #fff; border-color: var(--accent2); background: var(--accent);}
+
+.msg-time{font-size:10px;font-family:var(--mono);color:var(--text3);padding:0 6px;}
+.msg-row.mine .msg-time{text-align:right;}
+.sys-msg{align-self:center;font-size:11px;font-family:var(--mono);color:var(--accent2);background:rgba(139,92,246,0.1);padding:4px 16px;border-radius:20px;margin:12px 0;border:1px solid var(--border);}
+
+/* ── TYPING ── */
+.typing-bar{padding:4px 20px;min-height:22px;font-size:11px;font-family:var(--mono);color:var(--text2);flex-shrink:0;display:flex;align-items:center;gap:6px;}
+.tdots span{display:inline-block;width:4px;height:4px;background:var(--accent);border-radius:50%;animation:td 1.2s infinite;}
+.tdots span:nth-child(2){animation-delay:.2s;}
+.tdots span:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,60%,100%{transform:scale(1);opacity:.4;}30%{transform:scale(1.6);opacity:1;}}
+
+/* ── REPLY PREVIEW BAR ── */
+.reply-preview-bar{
+  display:none;align-items:center;justify-content:between;
+  padding:8px 20px;background:var(--surface2);
+  border-top:1px solid var(--border2);flex-shrink:0;gap:12px;
+}
+.reply-preview-bar.show{display:flex;}
+.reply-preview-content{flex:1;min-width:0;border-left:3px solid var(--accent);padding-left:10px;}
+.reply-preview-user{font-size:12px;font-family:var(--mono);font-weight:700;color:var(--accent2);}
+.reply-preview-text{font-size:13px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.reply-preview-close{width:24px;height:24px;border-radius:50%;background:transparent;border:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.reply-preview-close:hover{color:var(--red);background:rgba(244,63,94,0.1);}
+
+/* ── IMAGE PREVIEW ── */
+.img-preview{display:none;align-items:center;gap:12px;padding:10px 20px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;}
+.img-preview.show{display:flex;}
+.prev-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);}
+.prev-label{font-size:12px;color:var(--text2);font-family:var(--mono);flex:1;}
+.prev-rm{width:24px;height:24px;border-radius:50%;background:var(--red);border:none;color:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(244,63,94,0.3);}
+
+/* ── INPUT BAR ── */
+.input-bar{
+  display:flex;align-items:flex-end;gap:10px;
+  padding:12px 16px 16px;padding-bottom:max(16px,env(safe-area-inset-bottom));
+  background:rgba(15,15,21,0.8);border-top:1px solid var(--border);flex-shrink:0;backdrop-filter:blur(10px);
+}
+.ico-btn{
+  width:44px;height:44px;border-radius:var(--rs);
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--text2);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .2s;
+}
+.ico-btn:hover{border-color:var(--border2);color:var(--accent3);background:var(--surface2);}
+.msg-inp{
+  flex:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px 16px;font-family:var(--sans);
+  font-size:14px;color:var(--text);resize:none;outline:none;
+  min-height:44px;max-height:110px;line-height:1.5;
+  transition:border-color .2s, background .2s;overflow-y:auto;
+  font-weight:500;
+}
+.msg-inp::placeholder{color:var(--text3);}
+.msg-inp:focus{border-color:var(--border2);background:rgba(22,22,34,0.9);}
+.send-btn{
+  width:44px;height:44px;border-radius:var(--rs);border:none;
+  background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .2s;box-shadow:0 4px 12px rgba(139,92,246,0.3);
+}
+.send-btn:hover{background:#7c3aed;box-shadow:0 4px 16px rgba(139,92,246,0.5);transform:translateY(-1px);}
+.send-btn:active{transform:scale(.95);}
+
+/* ── LIGHTBOX ── */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(5,5,8,0.95);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+.lightbox.show{display:flex;}
+.lightbox img{max-width:92vw;max-height:85vh;border-radius:var(--r);object-fit:contain;box-shadow:0 10px 40px rgba(0,0,0,0.5);border:1px solid var(--border);}
+.lb-close{position:absolute;top:20px;right:20px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.lb-close:hover{background:var(--red);border-color:var(--red);}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:84px;right:16px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r);padding:12px 16px;
+  display:flex;align-items:center;gap:12px;
+  font-size:13px;z-index:5000;cursor:pointer;
+  animation:fadeUp .3s ease;max-width:300px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+.toast-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono);font-weight:700;flex-shrink:0;}
+.toast-name{font-weight:700;font-size:13px;color:#fff;}
+.toast-prev{color:var(--text2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;}
+
+/* ── OVERLAY ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(5,5,8,0.75);z-index:150;backdrop-filter:blur(4px);}
+.overlay.show{display:block;}
+
+/* ── STATUS BAR ── */
+.status-bar{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:6px 16px;font-family:var(--mono);font-size:11px;
+  background:rgba(245,158,11,0.08);border-bottom:1px solid rgba(245,158,11,0.2);
+  color:var(--yellow);flex-shrink:0;font-weight:700;
+}
+.status-bar.ok{background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.2);color:var(--green);}
+.status-bar.hide{display:none;}
+
+/* ── EMPTY STATE ── */
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--text3);font-family:var(--mono);font-size:13px;text-align:center;padding:20px;}
+.empty .eicon{font-size:42px;opacity:0.3;margin-bottom:6px;animation:pulse 2s infinite;}
+
+/* ── CONN STATUS ── */
+#connDot{width:8px;height:8px;border-radius:50%;background:var(--yellow);box-shadow:0 0 6px var(--yellow);}
+
+/* ── MOBILE ── */
+@media(max-width:640px){
+  .menu-btn{display:flex;}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:160;transform:translateX(-100%);width:82vw;max-width:320px;box-shadow:20px 0 40px rgba(0,0,0,0.5);}
+  .sidebar.open{transform:none;}
+  .badge-id{max-width:130px;}
+  .bubble{font-size:14px;padding:10px 14px;}
+  .msg-inp{font-size:16px;}
+}
+@media(min-width:641px){
+  .menu-btn{display:none!important;}
+  .overlay{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="status-bar" id="statusBar">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <span id="statusText">Menghubungkan ke server...</span>
+</div>
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="logo"><div class="logo-dot"></div>TechnoPious</div>
+  </div>
+  <div class="badge-id"><div class="dot"></div><span id="myIdLabel">--</span></div>
+  <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text2);font-weight:700;">
+    <div id="connDot"></div>
+    <span id="onlineCount">0</span>
+  </div>
+</header>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">Channels &amp; DMs</div>
+    <div class="sb-section">
+      <div class="sb-label">Publik</div>
+      <button class="ch-btn active" id="btn-global">
+        <div class="ch-icon">🌐</div>
+        <span>Global</span>
+      </button>
+      <button class="ch-btn" id="btn-random">
+        <div class="ch-icon">🎲</div>
+        <span>Random</span>
+      </button>
+      <button class="ch-btn" id="btn-tech">
+        <div class="ch-icon">⚙️</div>
+        <span>Tech Talk</span>
+      </button>
+    </div>
+    <div class="divider"></div>
+    <div class="sb-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+      <div class="sb-label">Direct Messages</div>
+      <button class="discovery-btn" id="discoveryBtn">
+        📡 <span>Cari Teman Anonim</span>
+      </button>
+      <div class="dm-list" id="dmList">
+        <div style="padding:10px;font-size:11px;font-family:var(--mono);color:var(--text3);">Menunggu pengguna lain...</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="chat-main">
+    <div class="chat-head">
+      <div class="chat-head-icon" id="chatIcon">🌐</div>
+      <div style="min-width:0;">
+        <div class="chat-head-name" id="chatName">Global</div>
+        <div class="chat-head-sub" id="chatSub">public · semua orang</div>
+      </div>
+      <div class="online-pill" id="onlinePill"><div class="dot"></div><span id="roomCount">0</span> online</div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="empty"><div class="eicon">💬</div><div>Menghubungkan...</div></div>
+    </div>
+
+    <div class="typing-bar" id="typingBar"></div>
+
+    <div class="reply-preview-bar" id="replyPreviewBar">
+      <div class="reply-preview-content">
+        <div class="reply-preview-user" id="replyPreviewUser">Membalas @User</div>
+        <div class="reply-preview-text" id="replyPreviewText">Isi chat...</div>
+      </div>
+      <button class="reply-preview-close" id="replyPreviewClose">✕</button>
+    </div>
+
+    <div class="img-preview" id="imgPreview">
+      <img class="prev-thumb" id="prevThumb" src="" alt="">
+      <div class="prev-label">Gambar siap dikirim</div>
+      <button class="prev-rm" id="prevRm">✕</button>
+    </div>
+
+    <div class="input-bar">
+      <button class="ico-btn" id="imgBtn" title="Kirim Gambar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+      </button>
+      <textarea class="msg-inp" id="msgInp" rows="1" placeholder="Ketik pesan..." autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+      <button class="send-btn" id="sendBtn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+      </button>
+    </div>
+  </main>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <img src="" id="lbImg" alt="">
+  <button class="lb-close" id="lbClose">✕</button>
+</div>
+<input type="file" id="fileInp" accept="image/*" style="display:none">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, set, remove, serverTimestamp, onDisconnect, off }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ── FIREBASE CONFIG ──
+const firebaseConfig = {
+  apiKey: "AIzaSyBV1390wMPVEs7AiSrUTM4KMusedM1WJYE",
+  authDomain: "technopious.firebaseapp.com",
+  databaseURL: "https://technopious-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "technopious",
+  storageBucket: "technopious.firebasestorage.app",
+  messagingSenderId: "677352437356",
+  appId: "1:677352437356:web:d50d2c4a6faded16b0ca49"
+};
+
+
+const COLORS = [
+  {bg:'#2d1b69',text:'#c4b5fd'},{bg:'#064e3b',text:'#6ee7b7'},
+  {bg:'#7f1d1d',text:'#fca5a5'},{bg:'#1e3a5f',text:'#93c5fd'},
+  {bg:'#4a1d96',text:'#ddd6fe'},{bg:'#14532d',text:'#86efac'},
+  {bg:'#78350f',text:'#fcd34d'},{bg:'#1e1b4b',text:'#a5b4fc'},
+  {bg:'#831843',text:'#fbcfe8'},{bg:'#0c4a6e',text:'#7dd3fc'},
+];
+function getColor(id){let h=0;for(const c of String(id))h=((h<<5)-h)+c.charCodeAt(0);return COLORS[Math.abs(h)%COLORS.length];}
+function genId(){
+  const w=['Anon','Ghost','Shadow','Void','Cipher','Nexus','Pixel','Echo','Neon','Phantom','Nova','Byte','Flux','Zero','Dusk'];
+  return w[Math.floor(Math.random()*w.length)]+(Math.floor(1000+Math.random()*9000));
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ts2time(ts){return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});}
+function compressImage(dataUrl,maxW=800,q=0.7){
+  return new Promise(res=>{
+    const img=new Image();img.onload=()=>{
+      const ratio=Math.min(1,maxW/img.width);
+      const c=document.createElement('canvas');
+      c.width=img.width*ratio;c.height=img.height*ratio;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL('image/jpeg',q));
+    };img.src=dataUrl;
+  });
+}
+
+// ── STATE ──
+const myId = (() => {
+  let id = sessionStorage.getItem('tp_id');
+  if (!id) { id = genId(); sessionStorage.setItem('tp_id', id); }
+  return id;
+})();
+
+let currentRoom = 'global';
+let pendingImage = null;
+let selectedReplyMsg = null;
+const unread = {};
+const typingSet = new Set();
+let typingTimer;
+
+const localMsgs = { global:[], random:[], tech:[] };
+const localDMs = {};
+function getDmKey(a,b){return [a,b].sort().join('|');}
+function getDmMsgs(k){if(!localDMs[k])localDMs[k]=[];return localDMs[k];}
+
+const peers = new Map();
+peers.set(myId, {color:getColor(myId), lastSeen:Date.now()});
+
+let bc;
+try { bc = new BroadcastChannel('tp_v4'); } catch(e) { bc = {postMessage:()=>{},onmessage:null}; }
+
+// ── DOM REFS ──
+const $id = id => document.getElementById(id);
+const statusBar = $id('statusBar');
+const statusText = $id('statusText');
+const connDot = $id('connDot');
+const myIdLabel = $id('myIdLabel');
+const onlineCount = $id('onlineCount');
+const roomCount = $id('roomCount');
+const messages = $id('messages');
+const typingBar = $id('typingBar');
+const msgInp = $id('msgInp');
+const sendBtn = $id('sendBtn');
+const imgBtn = $id('imgBtn');
+const fileInp = $id('fileInp');
+const imgPreview = $id('imgPreview');
+const prevThumb = $id('prevThumb');
+const prevRm = $id('prevRm');
+const lightbox = $id('lightbox');
+const lbImg = $id('lbImg');
+const lbClose = $id('lbClose');
+const sidebar = $id('sidebar');
+const overlay = $id('overlay');
+const menuBtn = $id('menuBtn');
+const dmList = $id('dmList');
+const chatIcon = $id('chatIcon');
+const chatName = $id('chatName');
+const chatSub = $id('chatSub');
+const onlinePill = $id('onlinePill');
+const discoveryBtn = $id('discoveryBtn');
+
+const replyPreviewBar = $id('replyPreviewBar');
+const replyPreviewUser = $id('replyPreviewUser');
+const replyPreviewText = $id('replyPreviewText');
+const replyPreviewClose = $id('replyPreviewClose');
+
+// ── INIT UI ──
+myIdLabel.textContent = myId;
+setStatus('connecting', 'Menghubungkan ke server...');
+
+// ── STATUS ──
+function setStatus(type, msg) {
+  statusBar.className = 'status-bar';
+  if (type === 'ok') { statusBar.classList.add('ok'); connDot.style.background = 'var(--green)'; }
+  else if (type === 'hide') { statusBar.classList.add('hide'); connDot.style.background = 'var(--green)'; return; }
+  else { connDot.style.background = 'var(--yellow)'; }
+  statusText.textContent = msg;
+}
+
+// ── FIREBASE ATTEMPT ──
+let db = null;
+let firebaseOk = false;
+let fbListeners = {};
+
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+
+  const connRef = ref(db, '.info/connected');
+  onValue(connRef, (snap) => {
+    if (snap.val() === true) {
+      firebaseOk = true;
+      setStatus('hide', '');
+      setupFirebase();
+    } else {
+      if (firebaseOk) setStatus('connecting', 'Koneksi terputus, mencoba ulang...');
+    }
+  });
+
+  setTimeout(() => {
+    if (!firebaseOk) {
+      setStatus('ok', '✓ Mode lokal (chat antar tab browser)');
+      setupLocalMode();
+    }
+  }, 4000);
+
+} catch(e) {
+  setStatus('ok', '✓ Mode lokal (chat antar tab browser)');
+  setupLocalMode();
+}
+
+// ── FIREBASE MODE ──
+function setupFirebase() {
+  const presRef = ref(db, `presence/${myId}`);
+  set(presRef, { id: myId, ts: serverTimestamp() });
+  onDisconnect(presRef).remove();
+
+  onValue(ref(db, 'presence'), snap => {
+    const data = snap.val() || {};
+    peers.clear();
+    peers.set(myId, {color: getColor(myId)});
+    Object.keys(data).forEach(id => {
+      if (id !== myId) peers.set(id, {color: getColor(id)});
+    });
+    updatePeerUI();
+  });
+
+  watchRoom(currentRoom);
+
+  onValue(ref(db, `typing/${currentRoom}`), snap => {
+    const data = snap.val() || {};
+    typingSet.clear();
+    Object.keys(data).forEach(id => { if (id !== myId) typingSet.add(id); });
+    renderTyping();
+  });
+
+  watchDMs();
+}
+
+function watchRoom(room) {
+  if (fbListeners.room) { off(fbListeners.room.ref); }
+
+  const r = ref(db, `rooms/${room}/messages`);
+  fbListeners.room = { ref: r };
+  localMsgs[room] = [];
+
+  onValue(r, snap => {
+    localMsgs[room] = [];
+    if (snap.exists()) {
+      snap.forEach(child => {
+        localMsgs[room].push(child.val());
+      });
+    }
+    if (currentRoom === room) renderMessages();
+  });
+}
+
+function watchDMs() {
+  const r = ref(db, `dms/${myId}`);
+  onValue(r, snap => {
+    if (!snap.exists()) return;
+    snap.forEach(peerSnap => {
+      const peer = peerSnap.key;
+      const key = getDmKey(myId, peer);
+      const msgs = [];
+      peerSnap.forEach(msgSnap => { msgs.push(msgSnap.val()); });
+      const prev = getDmMsgs(key).length;
+      localDMs[key] = msgs;
+      if (msgs.length > prev && currentRoom !== 'dm:' + peer) {
+        const last = msgs[msgs.length - 1];
+        if (last.sender !== myId) {
+          unread[key] = (unread[key] || 0) + 1;
+          renderDmList();
+          showToast(peer, last.image ? '📷 Gambar' : last.text);
+        }
+      }
+      if (currentRoom === 'dm:' + peer) renderMessages();
+    });
+  });
+}
+
+// ── LOCAL MODE ──
+function setupLocalMode() {
+  bc.postMessage({ type: 'presence', id: myId });
+  peers.set(myId, { color: getColor(myId) });
+
+  if (!localMsgs.global.length) {
+    localMsgs.global.push(
+      {id:'s0',type:'system',text:'Selamat datang di TechnoPious 👾',ts:Date.now()-60000},
+      {id:'s1',type:'system',text:'Mode lokal — buka tab baru untuk simulasi chat antar pengguna',ts:Date.now()-55000},
+    );
+  }
+  updatePeerUI();
+  renderMessages();
+}
+
+// ── BROADCAST CHANNEL ──
+bc.onmessage = (e) => {
+  const d = e.data;
+  if (d.type === 'presence') {
+    peers.set(d.id, { color: getColor(d.id) });
+    updatePeerUI();
+    bc.postMessage({ type: 'presence_ack', id: myId, to: d.id });
+  }
+  if (d.type === 'presence_ack' && d.to === myId) {
+    peers.set(d.id, { color: getColor(d.id) });
+    updatePeerUI();
+  }
+  if (d.type === 'msg') {
+    if (!localMsgs[d.room]) localMsgs[d.room] = [];
+    localMsgs[d.room].push(d.msg);
+    if (currentRoom === d.room) renderMessages();
+  }
+  if (d.type === 'dm' && d.to === myId) {
+    const key = getDmKey(myId, d.from);
+    getDmMsgs(key).push(d.msg);
+    if (currentRoom === 'dm:' + d.from) {
+      renderMessages();
+    } else {
+      unread[key] = (unread[key] || 0) + 1;
+      renderDmList();
+      showToast(d.from, d.msg.image ? '📷 Gambar' : d.msg.text);
+    }
+  }
+  if (d.type === 'typing') {
+    if (d.room === currentRoom && d.id !== myId) {
+      typingSet.add(d.id);
+      renderTyping();
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => { typingSet.delete(d.id); renderTyping(); }, 3000);
+    }
+  }
+  if (d.type === 'gone') {
+    peers.delete(d.id);
+    updatePeerUI();
+  }
+};
+
+window.addEventListener('beforeunload', () => {
+  bc.postMessage({ type: 'gone', id: myId });
+  if (db) { try { remove(ref(db, `presence/${myId}`)); } catch(e) {} }
+});
+
+// ── DISCOVERY LOGIC (BERTEMU PENGGUNA LAIN) ──
+function findAndConnectPeer() {
+  // Ambil list ID pengguna lain yang online
+  const otherPeers = [...peers.keys()].filter(id => id !== myId);
+  
+  if (!otherPeers.length) {
+    alert("Belum ada pengguna lain yang online saat ini. Coba buka tab baru!");
+    return;
+  }
+
+  // Pilih satu pengguna acak
+  const randomPeer = otherPeers[Math.floor(Math.random() * otherPeers.length)];
+  
+  // Langsung switch ke room chat DM orang tersebut
+  switchRoom('dm:' + randomPeer);
+}
+
+discoveryBtn.addEventListener('click', findAndConnectPeer);
+
+// ── REPLY FEATURE ──
+function initReply(msgId, sender, textContent) {
+  selectedReplyMsg = { id: msgId, sender: sender, text: textContent };
+  replyPreviewUser.textContent = `Membalas @${sender}`;
+  replyPreviewText.textContent = textContent;
+  replyPreviewBar.classList.add('show');
+  msgInp.focus();
+}
+function cancelReply() {
+  selectedReplyMsg = null;
+  replyPreviewBar.classList.remove('show');
+}
+replyPreviewClose.addEventListener('click', cancelReply);
+
+// ── SEND ──
+async function sendMessage() {
+  const text = msgInp.value.trim();
+  if (!text && !pendingImage) return;
+
+  let imgData = null;
+  if (pendingImage) imgData = await compressImage(pendingImage);
+
+  const msg = {
+    id: 'm' + Date.now() + Math.random().toString(36).slice(2),
+    sender: myId,
+    ts: Date.now(),
+    ...(text && { text }),
+    ...(imgData && { image: imgData }),
+    ...(selectedReplyMsg && { replyTo: selectedReplyMsg })
+  };
+
+  if (currentRoom.startsWith('dm:')) {
+    const peer = currentRoom.replace('dm:', '');
+    const key = getDmKey(myId, peer);
+    getDmMsgs(key).push(msg);
+
+    if (firebaseOk && db) {
+      push(ref(db, `dms/${myId}/${peer}`), msg);
+      push(ref(db, `dms/${peer}/${myId}`), msg);
+    } else {
+      bc.postMessage({ type: 'dm', from: myId, to: peer, msg });
+    }
+  } else {
+    if (!localMsgs[currentRoom]) localMsgs[currentRoom] = [];
+    localMsgs[currentRoom].push(msg);
+
+    if (firebaseOk && db) {
+      push(ref(db, `rooms/${currentRoom}/messages`), msg);
+    } else {
+      bc.postMessage({ type: 'msg', room: currentRoom, msg });
+    }
+  }
+
+  sendTypingSignal(false);
+  msgInp.value = '';
+  msgInp.style.height = '44px';
+  pendingImage = null;
+  imgPreview.classList.remove('show');
+  prevThumb.src = '';
+  cancelReply();
+  renderMessages();
+  msgInp.focus();
+}
+
+// ── TYPING SIGNAL ──
+let typingSent = false;
+function sendTypingSignal(active) {
+  if (!active && !typingSent) return;
+  typingSent = active;
+  bc.postMessage({ type: 'typing', id: myId, room: currentRoom, active });
+  if (firebaseOk && db && active) {
+    set(ref(db, `typing/${currentRoom}/${myId}`), { id: myId, ts: Date.now() });
+    setTimeout(() => {
+      try { remove(ref(db, `typing/${currentRoom}/${myId}`)); } catch(e) {}
+    }, 3000);
+  }
+}
+
+let typingInputTimer;
+msgInp.addEventListener('input', () => {
+  msgInp.style.height = '44px';
+  msgInp.style.height = Math.min(msgInp.scrollHeight, 110) + 'px';
+  sendTypingSignal(true);
+  clearTimeout(typingInputTimer);
+  typingInputTimer = setTimeout(() => sendTypingSignal(false), 2500);
+});
+
+// ── ROOM SWITCH ──
+const roomMeta = {
+  global: { icon:'🌐', name:'Global Space', sub:'public · semua orang' },
+  random: { icon:'🎲', name:'Matrix Room', sub:'public · ruang acak' },
+  tech:   { icon:'⚙️', name:'Cyber Talk', sub:'public · teknologi & kode' },
+};
+
+function switchRoom(room) {
+  currentRoom = room;
+  pendingImage = null;
+  imgPreview.classList.remove('show');
+  prevThumb.src = '';
+  cancelReply();
+
+  ['global','random','tech'].forEach(r => {
+    const b = $id('btn-' + r);
+    if (b) b.classList.toggle('active', r === room);
+  });
+
+  if (room.startsWith('dm:')) {
+    const peer = room.replace('dm:', '');
+    const col = getColor(peer);
+    chatIcon.innerHTML = `<div style="width:32px;height:32px;border-radius:50%;background:${col.bg};color:${col.text};display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono);font-weight:700;border:1px solid rgba(255,255,255,0.15)">${esc(peer.substring(0,2))}</div>`;
+    chatName.textContent = peer;
+    chatSub.textContent = 'Secure Session · encrypted';
+    const key = getDmKey(myId, peer);
+    unread[key] = 0;
+    renderDmList();
+    if (firebaseOk && db) watchDMs();
+  } else {
+    chatIcon.textContent = roomMeta[room]?.icon || '💬';
+    chatName.textContent = roomMeta[room]?.name || room;
+    chatSub.textContent = roomMeta[room]?.sub || 'public';
+    if (firebaseOk && db) watchRoom(room);
+  }
+
+  typingSet.clear();
+  renderTyping();
+  renderMessages();
+  closeSidebar();
+  msgInp.focus();
+}
+
+// ── RENDER MESSAGES ──
+function renderMessages() {
+  let msgs = [];
+  if (currentRoom.startsWith('dm:')) {
+    msgs = getDmMsgs(getDmKey(myId, currentRoom.replace('dm:', '')));
+  } else {
+    msgs = localMsgs[currentRoom] || [];
+  }
+
+  if (!msgs.length) {
+    messages.innerHTML = '<div class="empty"><div class="eicon">🛸</div><div>Belum ada transmisi data di sini</div><div style="font-size:11px;margin-top:4px;opacity:.5">Kirim data pertamamu sekarang.</div></div>';
+    roomCount.textContent = countRoomOnline();
+    return;
+  }
+
+  let html = '';
+  let lastSender = null;
+  msgs.forEach(msg => {
+    if (msg.type === 'system') {
+      html += `<div class="sys-msg">${esc(msg.text)}</div>`;
+      lastSender = null;
+      return;
+    }
+    const isMe = msg.sender === myId;
+    const showAv = msg.sender !== lastSender;
+    const col = getColor(msg.sender);
+    const avHtml = showAv
+      ? `<div class="msg-av" style="background:${col.bg};color:${col.text}">${esc(msg.sender.substring(0,2))}</div>`
+      : `<div class="msg-av hide"></div>`;
+    const nameHtml = showAv && !isMe ? `<div class="msg-name">${esc(msg.sender)}</div>` : '';
+    
+    let quoteHtml = '';
+    if (msg.replyTo) {
+      quoteHtml = `<div class="reply-quote"><div class="reply-quote-user">@${esc(msg.replyTo.sender)}</div>${esc(msg.replyTo.text)}</div>`;
+    }
+
+    let content = '';
+    if (msg.image) {
+      content = `<div class="bubble" style="padding:6px">${quoteHtml}<img src="${msg.image}" class="chat-img" alt="img" loading="lazy"></div>`;
+    } else {
+      content = `<div class="bubble">${quoteHtml}${esc(msg.text)}</div>`;
+    }
+
+    const textDataForReply = msg.image ? '📷 Gambar' : msg.text;
+    const replyBtnHtml = `<button class="reply-action-btn" onclick="initReply('${msg.id}', '${esc(msg.sender)}', '${esc(textDataForReply)}')">Reply</button>`;
+
+    html += `<div class="msg-row ${isMe ? 'mine' : ''}">
+      ${isMe ? '' : avHtml}
+      ${isMe ? replyBtnHtml : ''}
+      <div class="msg-wrap">${nameHtml}${content}<div class="msg-time">${ts2time(msg.ts)}</div></div>
+      ${isMe ? '' : replyBtnHtml}
+      ${isMe ? avHtml : ''}
+    </div>`;
+    lastSender = msg.sender;
+  });
+
+  messages.innerHTML = html;
+  messages.querySelectorAll('.chat-img').forEach(img => {
+    img.addEventListener('click', () => { lbImg.src = img.src; lightbox.classList.add('show'); });
+  });
+  messages.scrollTop = messages.scrollHeight;
+  roomCount.textContent = countRoomOnline();
+}
+
+window.initReply = initReply;
+
+function countRoomOnline() { return peers.size; }
+
+function renderTyping() {
+  if (!typingSet.size) { typingBar.innerHTML = ''; return; }
+  const names = [...typingSet].slice(0,2).map(esc).join(', ');
+  typingBar.innerHTML = `<span class="tdots"><span></span><span></span><span></span></span>&nbsp;${names} sedang mengetik...`;
+}
+
+function renderDmList() {
+  const otherPeers = [...peers.keys()].filter(id => id !== myId);
+  if (!otherPeers.length) {
+    dmList.innerHTML = '<div style="padding:12px;font-size:11px;font-family:var(--mono);color:var(--text3);text-align:center;">Tidak ada terminal aktif</div>';
+    return;
+  }
+  let html = '';
+  otherPeers.forEach(id => {
+    const col = getColor(id);
+    const key = getDmKey(myId, id);
+    const u = unread[key] || 0;
+    const isActive = currentRoom === 'dm:' + id;
+    html += `<button class="ch-btn dm-btn ${isActive?'active':''}" data-peer="${esc(id)}">
+      <div class="dm-av" style="background:${col.bg};color:${col.text}">${esc(id.substring(0,2))}</div>
+      <div class="online-dot"></div>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(id)}</span>
+      ${u>0?`<span class="ch-badge">${u}</span>`:''}
+    </button>`;
+  });
+  dmList.innerHTML = html;
+  dmList.querySelectorAll('.dm-btn').forEach(b => {
+    b.addEventListener('click', () => switchRoom('dm:' + b.dataset.peer));
+  });
+}
+
+function updatePeerUI() {
+  onlineCount.textContent = peers.size + ' online';
+  roomCount.textContent = peers.size;
+  renderDmList();
+}
+
+function showToast(peerId, preview) {
+  const col = getColor(peerId);
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-av" style="background:${col.bg};color:${col.text}">${esc(peerId.substring(0,2))}</div>
+    <div style="min-width:0"><div class="toast-name">Terminal ${esc(peerId)}</div><div class="toast-prev">${esc(preview)}</div></div>`;
+  t.addEventListener('click', () => { switchRoom('dm:' + peerId); t.remove(); });
+  document.body.appendChild(t);
+  setTimeout(() => { if (t.parentNode) t.remove(); }, 5000);
+}
+
+// ── IMAGE HANDLING ──
+imgBtn.addEventListener('click', () => fileInp.click());
+fileInp.addEventListener('change', function() {
+  if (this.files[0]) loadImg(this.files[0]);
+  this.value = '';
+});
+prevRm.addEventListener('click', () => {
+  pendingImage = null;
+  imgPreview.classList.remove('show');
+  prevThumb.src = '';
+});
+function loadImg(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    pendingImage = e.target.result;
+    prevThumb.src = pendingImage;
+    imgPreview.classList.add('show');
+  };
+  r.readAsDataURL(file);
+}
+
+const chatArea = document.querySelector('.chat-main');
+chatArea.addEventListener('dragover', e => { e.preventDefault(); chatArea.style.outline = '2px dashed var(--accent)'; });
+chatArea.addEventListener('dragleave', () => { chatArea.style.outline = ''; });
+chatArea.addEventListener('drop', e => {
+  e.preventDefault(); chatArea.style.outline = '';
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) loadImg(f);
+});
+document.addEventListener('paste', e => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) { loadImg(item.getAsFile()); break; }
+  }
+});
+
+// ── LIGHTBOX ──
+lbClose.addEventListener('click', () => lightbox.classList.remove('show'));
+lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('show'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('show'); });
+
+// ── SEND EVENTS ──
+sendBtn.addEventListener('click', sendMessage);
+msgInp.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+['global','random','tech'].forEach(r => {
+  $id('btn-' + r).addEventListener('click', () => switchRoom(r));
+});
+
+// ── MOBILE SIDEBAR ──
+function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+menuBtn.addEventListener('click', () => {
+  if (sidebar.classList.contains('open')) closeSidebar();
+  else openSidebar();
+});
+overlay.addEventListener('click', closeSidebar);
+
+renderMessages();
+renderDmList();
+
+setInterval(() => {
+  bc.postMessage({ type: 'presence', id: myId });
+  if (firebaseOk && db) {
+    try { set(ref(db, `presence/${myId}`), { id: myId, ts: Date.now() }); } catch(e) {}
+  }
+}, 30000);
+</script>
+</body>
+</html>
